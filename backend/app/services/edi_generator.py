@@ -1,4 +1,4 @@
-from app.schemas import EligibilityVerificationRequest, EligibilitySummary
+from ..schemas import EligibilityVerificationRequest, EligibilitySummary
 
 
 def generate_mock_271(

@@ -1,4 +1,4 @@
-from app.schemas import (
+from ..schemas import (
     EligibilityVerificationRequest,
     EligibilitySummary,
     PharmacyInfo,

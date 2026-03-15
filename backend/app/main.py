@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from app.schemas import (
+from .schemas import (
     EligibilityVerificationRequest,
     EligibilityVerificationResponse,
 )
-from app.services.eligibility_service import verify_eligibility
-from app.services.edi_generator import generate_mock_271
-from app.services.edi_parser import parse_mock_271
+from .services.eligibility_service import verify_eligibility
+from .services.edi_generator import generate_mock_271
+from .services.edi_parser import parse_mock_271
 
 app = FastAPI(
     title="MDLand Eligibility Verification Prototype",

@@ -1,4 +1,4 @@
-from app.schemas import EligibilitySummary, PharmacyInfo
+from ..schemas import EligibilityVerificationRequest, EligibilitySummary, PharmacyInfo
 
 
 def parse_mock_271(raw_271: str) -> EligibilitySummary:
