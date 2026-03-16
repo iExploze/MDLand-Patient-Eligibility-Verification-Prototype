@@ -167,7 +167,7 @@ This flow is the full intake demo.
 
 ## FastAPI / Why Rule Engine / Why Tesseract
 
-FastAPI is a good fit for this prototype for practical reasons:
+## FastAPI
 
 - It is fast to build with.
 - Pydantic models make request and response contracts explicit.
@@ -175,7 +175,7 @@ FastAPI is a good fit for this prototype for practical reasons:
 - Its routing style matches the small service-oriented structure of this codebase.
 - It keeps the backend simple enough that the architecture remains easy to inspect.
 
-In this project, FastAPI is doing exactly what it should do in a prototype:
+In this project, FastAPI is used for:
 
 - API definition
 - input validation
