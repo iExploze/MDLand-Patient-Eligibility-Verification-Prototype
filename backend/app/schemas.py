@@ -35,7 +35,7 @@ class EligibilitySummary(BaseModel):
     coverage_status: Literal["active", "inactive", "manual_review"]
     copay_amount: Optional[int] = None
     pharmacy: Optional[PharmacyInfo] = None
-    notes: list[str] = []
+    notes: list[str] = Field(default_factory=list)
 
 
 class EligibilityVerificationResponse(BaseModel):
@@ -56,9 +56,35 @@ class DocumentUploadResponse(BaseModel):
     message: str
 
 
+class RawPatientExtraction(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    dob: Optional[str] = None
+    address: Optional[str] = None
+    license_number: Optional[str] = None
+
+
+class RawInsuranceExtraction(BaseModel):
+    payer_name: Optional[str] = None
+    member_id: Optional[str] = None
+    group_number: Optional[str] = None
+    plan_name: Optional[str] = None
+    rx_bin: Optional[str] = None
+    rx_pcn: Optional[str] = None
+    rx_group: Optional[str] = None
+
+
+class OCRExtractionResult(BaseModel):
+    document_set_id: str
+    source_files: list[UploadedDocumentInfo] = Field(default_factory=list)
+    patient: RawPatientExtraction
+    insurance: RawInsuranceExtraction
+    warnings: list[str] = Field(default_factory=list)
+
+
 class DocumentExtractionResponse(BaseModel):
     document_set_id: str
     source_files: list[UploadedDocumentInfo]
     extracted_request: EligibilityVerificationRequest
-    warnings: list[str] = []
+    warnings: list[str] = Field(default_factory=list)
     verification_result: EligibilityVerificationResponse

@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from ..schemas import (
-    EligibilityVerificationRequest,
-    InsuranceInfo,
-    Patient,
+    OCRExtractionResult,
+    RawInsuranceExtraction,
+    RawPatientExtraction,
     UploadedDocumentInfo,
 )
 
@@ -27,14 +27,12 @@ def _build_uploaded_document_info(file_path: Path) -> UploadedDocumentInfo:
     )
 
 
-def extract_document_set(
-    document_set_id: str,
-) -> tuple[EligibilityVerificationRequest, list[UploadedDocumentInfo], list[str]]:
+def extract_raw_document_data(document_set_id: str) -> OCRExtractionResult:
     """
-    Mock extraction service.
+    Mock OCR layer.
 
-    Reads the uploaded document set from disk, verifies the expected files exist,
-    and returns structured patient + insurance data.
+    Reads the uploaded document set from disk and returns raw extracted fields.
+    This is intentionally separated from validation/normalization.
     """
     document_dir = UPLOADS_ROOT / document_set_id
 
@@ -43,7 +41,6 @@ def extract_document_set(
 
     source_files: list[UploadedDocumentInfo] = []
     warnings: list[str] = []
-
     found_files: dict[str, Path] = {}
 
     for role in REQUIRED_ROLES:
@@ -56,50 +53,57 @@ def extract_document_set(
         found_files[role] = file_path
         source_files.append(_build_uploaded_document_info(file_path))
 
-    # Mock extraction logic for now.
-    # You can later replace this with Tesseract / cloud OCR / document AI / vision model.
-    payer_name = "Aetna"
-    member_id = "ABC123456"
-    group_number = "GRP1001"
-    plan_name = "Gold PPO"
-    rx_bin = "610502"
-    rx_pcn = "AETRX"
-    rx_group = "RX1001"
+    combined_names = " ".join(path.name.lower() for path in found_files.values())
 
-    all_filenames = " ".join(path.name.lower() for path in found_files.values())
-
-    if "bcbs" in all_filenames or "blue" in all_filenames:
-        payer_name = "Blue Cross Blue Shield"
-        member_id = "BCBS998877"
-        group_number = "BC1001"
-        plan_name = "Silver PPO"
-        rx_bin = "004336"
-        rx_pcn = "ADV"
-        rx_group = "BCBSRX1"
-    elif "expired" in all_filenames:
-        payer_name = "Expired Health Plan"
-
-    extracted_request = EligibilityVerificationRequest(
-        patient=Patient(
-            first_name="Ian",
-            last_name="Zhang",
-            dob="2004-09-10",
-            address="Toronto, ON",
-            license_number="Z1234567",
-        ),
-        insurance=InsuranceInfo(
-            payer_name=payer_name,
-            member_id=member_id,
-            group_number=group_number,
-            plan_name=plan_name,
-            rx_bin=rx_bin,
-            rx_pcn=rx_pcn,
-            rx_group=rx_group,
-        ),
+    # Mock patient extraction
+    raw_patient = RawPatientExtraction(
+        first_name="Ian",
+        last_name="Zhang",
+        dob="2004-09-10",
+        address="Toronto, ON",
+        license_number="Z1234567",
     )
+
+    # Mock insurance extraction with simple filename-based branching
+    raw_insurance = RawInsuranceExtraction(
+        payer_name="Aetna",
+        member_id="ABC123456",
+        group_number="GRP1001",
+        plan_name="Gold PPO",
+        rx_bin="610502",
+        rx_pcn="AETRX",
+        rx_group="RX1001",
+    )
+
+    if "bcbs" in combined_names or "blue" in combined_names:
+        raw_insurance = RawInsuranceExtraction(
+            payer_name="Blue Cross Blue Shield",
+            member_id="BCBS998877",
+            group_number="BC1001",
+            plan_name="Silver PPO",
+            rx_bin="004336",
+            rx_pcn="ADV",
+            rx_group="BCBSRX1",
+        )
+    elif "expired" in combined_names:
+        raw_insurance = RawInsuranceExtraction(
+            payer_name="Expired Health Plan",
+            member_id="ABC123456",
+            group_number="GRP1001",
+            plan_name="Terminated Plan",
+            rx_bin=None,
+            rx_pcn=None,
+            rx_group=None,
+        )
 
     warnings.append(
         "Using mock OCR extraction. Replace services/ocr_service.py with a real OCR provider later."
     )
 
-    return extracted_request, source_files, warnings
+    return OCRExtractionResult(
+        document_set_id=document_set_id,
+        source_files=source_files,
+        patient=raw_patient,
+        insurance=raw_insurance,
+        warnings=warnings,
+    )
