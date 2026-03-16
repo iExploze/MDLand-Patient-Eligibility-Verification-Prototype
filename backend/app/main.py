@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+
+from .documents import router as documents_router
 from .schemas import (
     EligibilityVerificationRequest,
     EligibilityVerificationResponse,
@@ -11,6 +13,8 @@ app = FastAPI(
     title="MDLand Eligibility Verification Prototype",
     version="0.1.0",
 )
+
+app.include_router(documents_router)
 
 
 @app.get("/health")

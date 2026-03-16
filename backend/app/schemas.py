@@ -41,3 +41,24 @@ class EligibilitySummary(BaseModel):
 class EligibilityVerificationResponse(BaseModel):
     raw_271: str
     summary: EligibilitySummary
+
+
+class UploadedDocumentInfo(BaseModel):
+    role: str
+    original_filename: str
+    saved_filename: str
+    relative_path: str
+
+
+class DocumentUploadResponse(BaseModel):
+    document_set_id: str
+    files: list[UploadedDocumentInfo]
+    message: str
+
+
+class DocumentExtractionResponse(BaseModel):
+    document_set_id: str
+    source_files: list[UploadedDocumentInfo]
+    extracted_request: EligibilityVerificationRequest
+    warnings: list[str] = []
+    verification_result: EligibilityVerificationResponse
