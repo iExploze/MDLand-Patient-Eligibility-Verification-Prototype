@@ -1,4 +1,4 @@
-storage/uploads/
+backend/storage/uploads
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
