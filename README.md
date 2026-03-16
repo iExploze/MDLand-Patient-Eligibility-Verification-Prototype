@@ -85,7 +85,7 @@ flowchart TD
     F -->|GET /| M
     F -->|GET /health| M
     F -->|POST /documents/upload| D
-    F -->|POST /documents/extract/(document_set_id)| D
+    F -->|POST /documents/extract/:document_set_id| D
     F -->|POST /eligibility/verify| M
 
     subgraph Document Pipeline
