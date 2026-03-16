@@ -53,6 +53,7 @@ def _save_upload_file(upload: UploadFile, destination: Path) -> None:
 async def upload_documents(
     driver_license: UploadFile = File(...),
     insurance_front: UploadFile = File(...),
+    insurance_back: UploadFile = File(...),
 ):
     document_set_id = str(uuid4())
     target_dir = UPLOADS_ROOT / document_set_id
@@ -60,6 +61,7 @@ async def upload_documents(
     uploads = [
         ("driver_license", driver_license),
         ("insurance_front", insurance_front),
+        ("insurance_back", insurance_back),
     ]
 
     saved_files: list[UploadedDocumentInfo] = []

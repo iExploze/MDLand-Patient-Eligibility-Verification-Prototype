@@ -345,6 +345,10 @@
               <label for="insuranceFront">Insurance Front</label>
               <input id="insuranceFront" type="file" accept=".png,.jpg,.jpeg,.pdf" />
             </div>
+            <div class="field">
+              <label for="insuranceBack">Insurance Back</label>
+              <input id="insuranceBack" type="file" accept=".png,.jpg,.jpeg,.pdf" />
+            </div>
           </div>
 
           <div class="button-row">
@@ -422,6 +426,7 @@
   <script>
     const driverLicenseInput = document.getElementById('driverLicense');
     const insuranceFrontInput = document.getElementById('insuranceFront');
+    const insuranceBackInput = document.getElementById('insuranceBack');
     const documentSetIdInput = document.getElementById('documentSetId');
 
     const uploadBtn = document.getElementById('uploadBtn');
@@ -524,8 +529,9 @@
     async function uploadDocuments() {
       const driverLicense = driverLicenseInput.files[0];
       const insuranceFront = insuranceFrontInput.files[0];
+      const insuranceBack = insuranceBackInput.files[0];
 
-      if (!driverLicense || !insuranceFront) {
+      if (!driverLicense || !insuranceFront || !insuranceBack) {
         setStatus('Please select all three required files before uploading.', 'warning');
         return;
       }
@@ -533,6 +539,7 @@
       const formData = new FormData();
       formData.append('driver_license', driverLicense);
       formData.append('insurance_front', insuranceFront);
+      formData.append('insurance_back', insuranceBack);
 
       uploadBtn.disabled = true;
       setStatus('Uploading documents...', 'default');
@@ -598,6 +605,7 @@
     function clearScreen() {
       driverLicenseInput.value = '';
       insuranceFrontInput.value = '';
+      insuranceBackInput.value = '';
       documentSetIdInput.value = '';
       resetOutput();
       setStatus('Cleared. Ready for another test run.', 'default');

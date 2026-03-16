@@ -20,7 +20,7 @@ from ..schemas import (
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 UPLOADS_ROOT = BACKEND_DIR / "storage" / "uploads"
 
-REQUIRED_ROLES = ["driver_license", "insurance_front"]
+REQUIRED_ROLES = ["driver_license", "insurance_front", "insurance_back"]
 
 TESSERACT_CMD = os.getenv("TESSERACT_CMD")
 if TESSERACT_CMD:
@@ -439,13 +439,16 @@ def extract_raw_document_data(document_set_id: str) -> OCRExtractionResult:
     try:
         driver_text = _ocr_file(found_files["driver_license"])
         insurance_front_text = _ocr_file(found_files["insurance_front"])
+        insurance_back_text = _ocr_file(found_files["insurance_back"])
     except pytesseract.TesseractNotFoundError as exc:
         raise ValueError(
             "Tesseract OCR is not installed or not on PATH. "
             "Install Tesseract and/or set the TESSERACT_CMD environment variable."
         ) from exc
 
-    insurance_text = insurance_front_text
+    insurance_text = "\n".join(
+        text for text in [insurance_front_text, insurance_back_text] if text
+    )
 
     if len(_clean_text(driver_text) or "") < 20:
         warnings.append("Very little OCR text was extracted from driver_license.")
