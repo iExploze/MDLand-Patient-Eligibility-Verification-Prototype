@@ -312,6 +312,46 @@
       color: var(--muted);
     }
 
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: min(360px, calc(100vw - 40px));
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(94,234,212,0.28);
+      background: rgba(10, 18, 38, 0.96);
+      color: var(--text);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      z-index: 9999;
+      transform: translateY(-16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.hidden {
+      display: none;
+    }
+
+    .toast-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #d9fffa;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
     @media (max-width: 980px) {
       .grid {
         grid-template-columns: 1fr;
@@ -423,6 +463,16 @@
     </section>
   </div>
 
+  <div id="toast" class="toast hidden">
+    <div class="toast-title" id="toastTitle">Verification Complete</div>
+    <div class="toast-message" id="toastMessage">Eligibility results are ready.</div>
+  </div>
+  <audio
+    id="doneSound"
+    preload="auto"
+    src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTAAAAAAAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA"
+  ></audio>
+
   <script>
     const driverLicenseInput = document.getElementById('driverLicense');
     const insuranceFrontInput = document.getElementById('insuranceFront');
@@ -444,10 +494,47 @@
     const copayText = document.getElementById('copayText');
     const binText = document.getElementById('binText');
     const statusBadge = document.getElementById('statusBadge');
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const doneSound = document.getElementById('doneSound');
+
+    let toastTimer = null;
 
     function setStatus(message, kind = 'default') {
       statusBox.className = `status ${kind === 'default' ? '' : kind}`.trim();
       statusBox.textContent = message;
+    }
+
+    function showToast(title, message, duration = 3500) {
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+
+      toast.classList.remove('hidden');
+
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+
+      if (toastTimer) {
+        clearTimeout(toastTimer);
+      }
+
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 250);
+      }, duration);
+    }
+
+    function playDoneSound() {
+      if (!doneSound) return;
+
+      doneSound.currentTime = 0;
+      doneSound.play().catch((error) => {
+        console.warn('Could not play completion sound:', error);
+      });
     }
 
     function toPrettyJson(value) {
@@ -595,6 +682,17 @@
         raw271.textContent = data.verification_result?.raw_271 || 'No raw 271 returned.';
 
         setStatus('Extraction and verification completed successfully.', 'success');
+
+        const summary = data.verification_result?.summary || {};
+        const coverage = summary.coverage_status || 'unknown';
+        const copay = summary.copay_amount ?? 'N/A';
+
+        showToast(
+          'Verification Complete',
+          `Coverage: ${coverage} • Copay: ${copay === 'N/A' ? 'N/A' : '$' + copay}`
+        );
+
+        playDoneSound();
       } catch (error) {
         setStatus(error.message || 'Extraction failed.', 'error');
       } finally {
