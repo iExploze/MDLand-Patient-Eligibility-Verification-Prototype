@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from pathlib import Path
 
 from .documents import router as documents_router
 from .schemas import (
@@ -14,12 +16,19 @@ app = FastAPI(
     version="0.1.0",
 )
 
+APP_DIR = Path(__file__).resolve().parent
+STATIC_DIR = APP_DIR / "static"
+
 app.include_router(documents_router)
 
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.get("/")
+def serve_index():
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.post(

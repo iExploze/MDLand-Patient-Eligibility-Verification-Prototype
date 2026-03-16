@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDLand Eligibility Verification Prototype</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a31;
+      --panel-2: #182243;
+      --text: #edf2ff;
+      --muted: #a8b3cf;
+      --accent: #7aa2ff;
+      --accent-2: #5eead4;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --border: rgba(255,255,255,0.1);
+      --shadow: 0 20px 45px rgba(0,0,0,0.3);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #0f1630 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: start;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .panel-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .panel-body {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: rgba(122,162,255,0.7);
+      box-shadow: 0 0 0 4px rgba(122,162,255,0.15);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), #5b7cff);
+      color: white;
+    }
+
+    .secondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .status {
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      border-color: rgba(94,234,212,0.35);
+      background: rgba(94,234,212,0.08);
+      color: #d9fffa;
+    }
+
+    .status.error {
+      border-color: rgba(248,113,113,0.35);
+      background: rgba(248,113,113,0.08);
+      color: #ffe2e2;
+    }
+
+    .status.warning {
+      border-color: rgba(251,191,36,0.35);
+      background: rgba(251,191,36,0.08);
+      color: #fff0c7;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pill strong { color: var(--text); }
+
+    .result-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .result-card {
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .result-card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .kv {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .kv-item {
+      background: rgba(255,255,255,0.035);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+
+    .kv-item .label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kv-item .value {
+      display: block;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .badge.active {
+      background: rgba(34,197,94,0.16);
+      color: #c7ffd7;
+      border: 1px solid rgba(34,197,94,0.25);
+    }
+
+    .badge.inactive {
+      background: rgba(248,113,113,0.16);
+      color: #ffd8d8;
+      border: 1px solid rgba(248,113,113,0.25);
+    }
+
+    .badge.manual_review {
+      background: rgba(251,191,36,0.16);
+      color: #fff0c7;
+      border: 1px solid rgba(251,191,36,0.25);
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #d9e4ff;
+      background: rgba(3, 8, 23, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      max-height: 320px;
+      overflow: auto;
+    }
+
+    .warning-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #fff0c7;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">MDLand Prototype</div>
+      <h1>Patient Eligibility Verification</h1>
+      <p class="subtitle">
+        Upload the driver's license and insurance card images, extract structured fields, then run eligibility verification and review the parsed 271 response.
+      </p>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">1. Upload Documents</h2>
+          <p class="panel-subtitle">Use the three required intake documents, then extract and verify from the created document set.</p>
+        </div>
+        <div class="panel-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="driverLicense">Driver License</label>
+              <input id="driverLicense" type="file" accept=".png,.jpg,.jpeg,.pdf" />
+            </div>
+            <div class="field">
+              <label for="insuranceFront">Insurance Front</label>
+              <input id="insuranceFront" type="file" accept=".png,.jpg,.jpeg,.pdf" />
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button id="uploadBtn" class="primary">Upload Documents</button>
+            <button id="extractBtn" class="secondary">Extract + Verify</button>
+            <button id="clearBtn" class="secondary">Clear Screen</button>
+          </div>
+
+          <div class="field">
+            <label for="documentSetId">Document Set ID</label>
+            <input id="documentSetId" type="text" placeholder="Generated after upload, or paste an existing ID here" />
+          </div>
+
+          <div id="statusBox" class="status">Ready. Upload a document set to begin.</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">2. Verification Snapshot</h2>
+          <p class="panel-subtitle">Quick view of the current eligibility result.</p>
+        </div>
+        <div class="panel-body result-grid">
+          <div class="pill-row">
+            <div class="pill"><strong>Coverage:</strong> <span id="coverageText">—</span></div>
+            <div class="pill"><strong>Copay:</strong> <span id="copayText">—</span></div>
+            <div class="pill"><strong>Pharmacy BIN:</strong> <span id="binText">—</span></div>
+          </div>
+
+          <div>
+            <span id="statusBadge" class="badge manual_review">No result yet</span>
+          </div>
+
+          <div class="result-card">
+            <h3>Warnings</h3>
+            <ul id="warningList" class="warning-list">
+              <li class="muted">No warnings yet.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div style="height: 20px"></div>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">3. Extracted Data + Response</h2>
+        <p class="panel-subtitle">Structured fields, parsed summary, and raw mock 271 output.</p>
+      </div>
+      <div class="panel-body result-grid">
+        <div class="result-card">
+          <h3>Extracted Patient</h3>
+          <div id="patientGrid" class="kv"></div>
+        </div>
+
+        <div class="result-card">
+          <h3>Extracted Insurance</h3>
+          <div id="insuranceGrid" class="kv"></div>
+        </div>
+
+        <div class="result-card">
+          <h3>Parsed Eligibility Summary</h3>
+          <pre id="summaryJson">No response yet.</pre>
+        </div>
+
+        <div class="result-card">
+          <h3>Raw 271</h3>
+          <pre id="raw271">No response yet.</pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const driverLicenseInput = document.getElementById('driverLicense');
+    const insuranceFrontInput = document.getElementById('insuranceFront');
+    const documentSetIdInput = document.getElementById('documentSetId');
+
+    const uploadBtn = document.getElementById('uploadBtn');
+    const extractBtn = document.getElementById('extractBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    const statusBox = document.getElementById('statusBox');
+    const warningList = document.getElementById('warningList');
+    const summaryJson = document.getElementById('summaryJson');
+    const raw271 = document.getElementById('raw271');
+    const patientGrid = document.getElementById('patientGrid');
+    const insuranceGrid = document.getElementById('insuranceGrid');
+
+    const coverageText = document.getElementById('coverageText');
+    const copayText = document.getElementById('copayText');
+    const binText = document.getElementById('binText');
+    const statusBadge = document.getElementById('statusBadge');
+
+    function setStatus(message, kind = 'default') {
+      statusBox.className = `status ${kind === 'default' ? '' : kind}`.trim();
+      statusBox.textContent = message;
+    }
+
+    function toPrettyJson(value) {
+      return JSON.stringify(value, null, 2);
+    }
+
+    function createKvItem(label, value) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'kv-item';
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'label';
+      labelEl.textContent = label;
+
+      const valueEl = document.createElement('span');
+      valueEl.className = 'value';
+      valueEl.textContent = value ?? '—';
+
+      wrapper.appendChild(labelEl);
+      wrapper.appendChild(valueEl);
+      return wrapper;
+    }
+
+    function renderObjectGrid(container, obj) {
+      container.innerHTML = '';
+      if (!obj) {
+        container.appendChild(createKvItem('status', 'No data'));
+        return;
+      }
+
+      Object.entries(obj).forEach(([key, value]) => {
+        container.appendChild(createKvItem(key, value));
+      });
+    }
+
+    function renderWarnings(warnings) {
+      warningList.innerHTML = '';
+      if (!warnings || warnings.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'muted';
+        li.textContent = 'No warnings.';
+        warningList.appendChild(li);
+        return;
+      }
+
+      warnings.forEach((warning) => {
+        const li = document.createElement('li');
+        li.textContent = warning;
+        warningList.appendChild(li);
+      });
+    }
+
+    function renderSnapshot(summary) {
+      const coverage = summary?.coverage_status ?? '—';
+      const copay = summary?.copay_amount ?? '—';
+      const bin = summary?.pharmacy?.bin ?? '—';
+
+      coverageText.textContent = coverage;
+      copayText.textContent = copay === '—' ? '—' : `$${copay}`;
+      binText.textContent = bin;
+
+      statusBadge.textContent = `Status: ${coverage}`;
+      statusBadge.className = `badge ${coverage}`;
+    }
+
+    function resetOutput() {
+      renderObjectGrid(patientGrid, null);
+      renderObjectGrid(insuranceGrid, null);
+      renderWarnings([]);
+      summaryJson.textContent = 'No response yet.';
+      raw271.textContent = 'No response yet.';
+      coverageText.textContent = '—';
+      copayText.textContent = '—';
+      binText.textContent = '—';
+      statusBadge.textContent = 'No result yet';
+      statusBadge.className = 'badge manual_review';
+    }
+
+    async function uploadDocuments() {
+      const driverLicense = driverLicenseInput.files[0];
+      const insuranceFront = insuranceFrontInput.files[0];
+
+      if (!driverLicense || !insuranceFront) {
+        setStatus('Please select all three required files before uploading.', 'warning');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('driver_license', driverLicense);
+      formData.append('insurance_front', insuranceFront);
+
+      uploadBtn.disabled = true;
+      setStatus('Uploading documents...', 'default');
+
+      try {
+        const response = await fetch('/documents/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Upload failed.');
+        }
+
+        documentSetIdInput.value = data.document_set_id;
+        setStatus(`Upload complete. Document set created: ${data.document_set_id}`, 'success');
+      } catch (error) {
+        setStatus(error.message || 'Upload failed.', 'error');
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    }
+
+    async function extractAndVerify() {
+      const documentSetId = documentSetIdInput.value.trim();
+
+      if (!documentSetId) {
+        setStatus('Enter or generate a document set ID first.', 'warning');
+        return;
+      }
+
+      extractBtn.disabled = true;
+      setStatus(`Extracting and verifying document set ${documentSetId}...`, 'default');
+
+      try {
+        const response = await fetch(`/documents/extract/${encodeURIComponent(documentSetId)}`, {
+          method: 'POST',
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Extraction failed.');
+        }
+
+        renderObjectGrid(patientGrid, data.extracted_request?.patient);
+        renderObjectGrid(insuranceGrid, data.extracted_request?.insurance);
+        renderWarnings(data.warnings || []);
+        renderSnapshot(data.verification_result?.summary);
+        summaryJson.textContent = toPrettyJson(data.verification_result?.summary || {});
+        raw271.textContent = data.verification_result?.raw_271 || 'No raw 271 returned.';
+
+        setStatus('Extraction and verification completed successfully.', 'success');
+      } catch (error) {
+        setStatus(error.message || 'Extraction failed.', 'error');
+      } finally {
+        extractBtn.disabled = false;
+      }
+    }
+
+    function clearScreen() {
+      driverLicenseInput.value = '';
+      insuranceFrontInput.value = '';
+      documentSetIdInput.value = '';
+      resetOutput();
+      setStatus('Cleared. Ready for another test run.', 'default');
+    }
+
+    uploadBtn.addEventListener('click', uploadDocuments);
+    extractBtn.addEventListener('click', extractAndVerify);
+    clearBtn.addEventListener('click', clearScreen);
+
+    resetOutput();
+  </script>
+</body>
+</html>
